@@ -79,18 +79,17 @@ where
     fn args(&self) -> Self::Args;
 
     /// Returns the environment variables this instance was created with.
-    fn env_vars(&self) -> Self::EnvVars;
+    fn env_vars(&self) -> Self::EnvVars {
+        Self::EnvVars::default()
+    }
 
     /// Returns the volumes this instance was created with.
-    fn volumes(&self) -> Self::Volumes;
+    fn volumes(&self) -> Self::Volumes {
+        Self::Volumes::default()
+    }
 
     /// Re-configures the current instance of this image with the given arguments.
     fn with_args(self, arguments: Self::Args) -> Self;
-
-    /// Re-configures the current instance of this image with the given entrypoint.
-    fn with_entrypoint(self, _entryppoint: &Self::EntryPoint) -> Self {
-        self
-    }
 
     /// Returns the entrypoint this instance was created with.
     fn entrypoint(&self) -> Option<String> {

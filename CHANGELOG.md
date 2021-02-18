@@ -20,6 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - How images express when a container is ready: Instead of implementing `wait_until_ready`, images now need to implement `ready_conditions` which returns a list of `WaitFor` instances.
 - Return value of `get_host_port` from `Option<u16>` to `u16`.
   If the port cannot be resolved, this function will now **panic**.
+- Make `Image::env_vars` and `Image::volumes` optional to implement.
+  Not every image cares about environment variables and volumes.
+  By making this optional, these images are easier and less noisy to implement.
 
 ### Removed
 
@@ -28,6 +31,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   We now wait for 2 seconds unconditionally after the specified message has been found.
 - Support for the `KEEP_CONTAINERS` env variable.
   The functionality of `KEEP_CONTAINERS=true` is superseded by `TESTCONTAINERS=keep`.
+- `with_entrypoint` from the `Image` trait.
+  This functionality is not used within the library.
+  Images that need this kind of customization can always implement it on their own type directly but there is no need to force it onto them.
 
 ### Fixed
 
