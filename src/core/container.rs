@@ -1,5 +1,10 @@
 use crate::{
-    core::{docker::Docker, env::Command, image::WaitFor},
+    core::{
+        docker::Docker,
+        env::Command,
+        image::WaitFor,
+        ports::{MapToHostPort, Ports},
+    },
     Image,
 };
 use std::{fmt, marker::PhantomData};
@@ -128,13 +133,17 @@ impl<'d, I> Container<'d, I> {
     /// This method panics if the given port is not mapped.
     /// Testcontainers is designed to be used in tests only. If a certain port is not mapped, the container
     /// is unlikely to be useful.
-    pub fn get_host_port(&self, internal_port: u16) -> u16 {
+    pub fn get_host_port<T>(&self, internal_port: T) -> T
+    where
+        T: fmt::Debug,
+        Ports: MapToHostPort<T>,
+    {
         self.docker_client
             .ports(&self.id)
-            .map_to_host_port(internal_port)
+            .map_to_host_port(&internal_port)
             .unwrap_or_else(|| {
                 panic!(
-                    "container {} does not expose port {}",
+                    "container {:?} does not expose port {:?}",
                     self.id, internal_port
                 )
             })

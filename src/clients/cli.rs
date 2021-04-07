@@ -1,5 +1,6 @@
 use crate::core::{
-    env, env::GetEnvValue, logs::LogStream, ports::Ports, Container, Docker, Image, RunArgs,
+    env, env::GetEnvValue, logs::LogStream, ports::Ports, Container, Docker, Image, PortMapping,
+    RunArgs,
 };
 use shiplift::rep::ContainerDetails;
 use std::{
@@ -155,9 +156,14 @@ impl Client {
 
         if let Some(ports) = run_args.ports() {
             for port in &ports {
+                let (local, internal, protocol) = match port {
+                    PortMapping::Tcp { local, internal } => (local, internal, "tcp"),
+                    PortMapping::Udp { local, internal } => (local, internal, "udp"),
+                    PortMapping::Sctp { local, internal } => (local, internal, "sctp"),
+                };
                 command
                     .arg("-p")
-                    .arg(format!("{}:{}", port.local, port.internal));
+                    .arg(format!("{}:{}/{}", local, internal, protocol));
             }
         } else {
             command.arg("-P"); // expose all ports
@@ -474,8 +480,8 @@ mod tests {
 
         assert!(format!("{:?}", command).contains(r#"-d"#));
         assert!(!format!("{:?}", command).contains(r#"-P"#));
-        assert!(format!("{:?}", command).contains(r#""-p" "123:456""#));
-        assert!(format!("{:?}", command).contains(r#""-p" "555:888""#));
+        assert!(format!("{:?}", command).contains(r#""-p" "123:456/tcp""#));
+        assert!(format!("{:?}", command).contains(r#""-p" "555:888/tcp""#));
     }
 
     #[test]
